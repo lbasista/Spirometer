@@ -1,8 +1,15 @@
-SYSTEMC_INC = /usr/local/include
-SYSTEMC_LIB = /usr/local/lib
+# Ścieżki do SystemC (zgodnie z Twoją konfiguracją na RPi 5)
+SYSTEMC_INC = /opt/systemc/include
+SYSTEMC_LIB = /opt/systemc/lib-linux64
 
+# Kompilator i flagi
+CXX = g++
+CXXFLAGS = -I. -I$(SYSTEMC_INC) -L$(SYSTEMC_LIB) -lsystemc
+
+# Cel główny
 all:
-	g++ hello_systemc.cpp -I$(SYSTEMC_INC) -L$(SYSTEMC_LIB) -lsystemc -o hello
+	$(CXX) main.cpp $(CXXFLAGS) -o spirometer
 
+# Czyszczenie śmieci
 clean:
-	rm -f hello
+	rm -f spirometer

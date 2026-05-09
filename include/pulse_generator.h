@@ -3,6 +3,7 @@
 
 #include <systemc.h>
 #include "types.h"
+#include <cstdlib>
 
 SC_MODULE(PulseGenerator) {
     sc_port<sc_fifo_out_if<SpiroData>> out_port;
@@ -13,19 +14,16 @@ SC_MODULE(PulseGenerator) {
 
     void generate_pulses() {
         SpiroData data;
-        data.patient_id = 0;
         data.is_command = false;
-        double fake_flow = 0.0;
 
         while (true) {
-            //Symulowanie oddechu
-            fake_flow += 0.1;
-            if (fake_flow > 5.0) fake_flow = 0;
+            //Symulowanie oddechu (placeholder: losowy przepływ 0-6L/min)
+            double fake_flow = static_cast<double>(rand() % 600) / 100.0;
             
             data.value = fake_flow;
             out_port->write(data);
 
-            wait(100, SC_MS);
+            wait(1, SC_SEC); //Odczyt co 1sek
         }
     }
 };
