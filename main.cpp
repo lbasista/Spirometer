@@ -24,7 +24,6 @@ int sc_main(int argc, char* argv[]) {
     processor.in_sensor(sensor_pipe);
     processor.in_keyboard(keyboard_pipe);
 
-    cout << "Start symulacji spirometru" << endl;
     sc_start();
 
     return 0;

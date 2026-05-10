@@ -4,31 +4,54 @@
 #include <systemc.h>
 #include "types.h"
 #include <iostream>
+#include <thread>
 
 SC_MODULE(KeyboardInterface) {
     sc_port<sc_fifo_out_if<SpiroData>> out_port;
 
     SC_CTOR(KeyboardInterface) {
-        SC_THREAD(keyboard_task);
-    }
+        std::thread([this]() {
+            bool is_measuring_kb = false; //Flaga do ukrywania menu
 
-    void keyboard_task() {
-        SpiroData cmd_packet;
-        cmd_packet.is_command = true;
+            while (true) {
+                char action;
 
-        while (true) {
-            int new_id;
-            std::cout << "\nWprowadz nowe ID pacjenta: " << std::flush;
-            std::cin >> new_id;
+                if (!is_measuring_kb) {
+                    cout << "[I] - Wprowadz ID pacjenta" << endl;
+                    cout << "[T] - Ustaw temperature otoczenia" << endl;
+                    cout << "[S] - START" << endl;
+                    cout << "Wybierz opcje: " << flush;
+                }
+                
+                if(!(std::cin >> action)) break;
 
-            cmd_packet.patient_id = new_id;
-            cmd_packet.value = 0.0;
+                SpiroData cmd_packet;
+                cmd_packet.is_command = true;
 
-            out_port->write(cmd_packet);
+                if (action == 'i' || action == 'I') {
+                    if (is_measuring_kb) continue;
+                    cout << "Podaj ID: ";
+                    cin >> cmd_packet.patient_id;
+                    out_port->write(cmd_packet);
+                } else if (action == 't' || action == 'T') {
+                    if (is_measuring_kb) continue;
+                    cout << "Podaj temperature otoczenia [C]: ";
+                    cin >> cmd_packet.temperature;
+                    out_port->write(cmd_packet);
+                } else if (action == 's' || action == 'S') {
+                    is_measuring_kb = !is_measuring_kb; //Przełącznik Start/Stop
+                    cmd_packet.value = -1.0;
+                    out_port->write(cmd_packet);
 
-            std::cout << "Odbywa sie pomiar [10sek]" << std::endl;
-            wait(10, SC_SEC);
-        }
+                    if (is_measuring_kb) {
+                        cout << "\nPomiar rozpoczęty. Aby zatrzymać, wciśnij S i potwierdź ENTER." << endl;
+                        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                    } else std::this_thread::sleep_for(std::chrono::milliseconds(300));
+                } else {
+                    if (!is_measuring_kb) cout << "Nieprawidlowa opcja";
+                }
+            }
+        }).detach();
     }
 };
 

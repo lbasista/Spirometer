@@ -5,9 +5,12 @@
 #include <string>
 
 struct SpiroData {
-    int patient_id;
-    double value; //Częstotliwość impulsów lub litraż
-    bool is_command; //Dane z sensora czy z klawiatury
+    int patient_id = 0;
+    double value = 0.0; //Częstotliwość impulsów lub litraż
+    bool is_command = false; //Dane z sensora czy z klawiatury
+    double temperature = 0.0; //Temperatura otoczenia
+
+    SpiroData() {} //Zerowanie danych
 
     bool operator==(const SpiroData& rhs) const {
         return (patient_id == rhs.patient_id && value == rhs.value && is_command == rhs.is_command);
